@@ -10,4 +10,6 @@ public interface IntArticleService {
     public Article getArticleById(String id);
     public void deleteArticleById(String id);
     public Article addArticle(Article article);
+    public List<Article> getThreeLastArticles();
+
 }

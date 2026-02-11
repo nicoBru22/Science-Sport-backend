@@ -32,6 +32,14 @@ public class ArticleController {
         return new ResponseEntity<>(listArticles, HttpStatus.OK) ;
     }
 
+    @GetMapping("/troisDerniersArticles")
+    public ResponseEntity<List<Article>> getTroisDerniersArticles() {
+        logger.info("Entrée dans le Controller pour récupérer les 3 derniers articles.");
+        List<Article> listTroisDerniersArticles = intArticleService.getThreeLastArticles();
+        logger.info("Retourne la liste des derniers articles.");
+        return ResponseEntity.ok(listTroisDerniersArticles);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<Article> findById(@PathVariable String id) {
         logger.info("Entrée dans le Controller pour récupérer un article par son Id.");
@@ -39,6 +47,8 @@ public class ArticleController {
         logger.info("Retourne la article par son Id.");
         return ResponseEntity.ok(articleFinded);
     }
+
+
 
     @PostMapping
     public ResponseEntity<Article> save(@RequestBody Article article) {

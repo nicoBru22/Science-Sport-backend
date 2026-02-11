@@ -7,8 +7,10 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ArticleService implements IntArticleService{
@@ -42,6 +44,20 @@ public class ArticleService implements IntArticleService{
         articleRepository.deleteById(id);
         logger.info("Suppression de l'article réussi");
     }
+
+    public List<Article> getThreeLastArticles() {
+        logger.info("Entrée dans le service pour récupérer la liste des 3 derniers articles.");
+        List<Article> listArticle = getAllArticles();
+
+        // On trie par date décroissante et on prend les 3 premiers
+        List<Article> troisDerniersArticles = listArticle.stream()
+                .sorted(Comparator.comparing(Article::getDateModification).reversed()) // tri décroissant
+                .limit(3) // on prend les 3 premiers
+                .collect(Collectors.toList());
+        logger.info("le nombre d'article récupéré : {}", troisDerniersArticles.size());
+        return troisDerniersArticles;
+    }
+
 
     public Article addArticle(Article article) {
         logger.info("Entrée dans le Service pour ajouter un nouvel article.");
