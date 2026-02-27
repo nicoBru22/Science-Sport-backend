@@ -20,9 +20,20 @@ public class BackendApplication {
 
 		// 2. Transférer les variables dans une Map
 		Map<String, Object> envVariables = new HashMap<>();
-		dotenv.entries().forEach(entry -> envVariables.put(entry.getKey(), entry.getValue()));
+		for (DotenvEntry entry : dotenv.entries()) {
+			envVariables.put(entry.getKey(), entry.getValue());
+		}
 
-		// 3. Ajouter cette Map aux propriétés de l'application avant le démarrage
+		// 3. LOG DE VÉRIFICATION
+		String mongoUri = (String) envVariables.get("MONGODB_URI");
+		if (mongoUri != null && !mongoUri.isEmpty()) {
+			// On affiche seulement le début pour vérifier que ce n'est pas vide ou null
+			System.out.println("✅ [DEBUG] MONGODB_URI chargée avec succès. Début : " + mongoUri.substring(0, 20) + "...");
+		} else {
+			System.err.println("❌ [DEBUG] MONGODB_URI est INTROUVABLE dans le fichier .env !");
+		}
+
+		// 4. Ajouter cette Map aux propriétés de l'application
 		app.setDefaultProperties(envVariables);
 
 		app.run(args);

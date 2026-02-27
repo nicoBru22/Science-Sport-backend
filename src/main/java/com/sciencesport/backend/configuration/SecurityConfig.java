@@ -25,8 +25,12 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
+                        // On autorise explicitement les requêtes de pré-vérification CORS
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        // On ouvre les articles au public
                         .requestMatchers("/api/articles/**").permitAll()
                         .requestMatchers("/login").permitAll()
+                        // Tout le reste est protégé
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
