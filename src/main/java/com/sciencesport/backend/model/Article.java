@@ -6,6 +6,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
+import java.util.List;
 
 @Data
 @Document(collection = "articles")
@@ -16,22 +17,30 @@ public class Article {
     private String titre;
     private String categorie;
 
-    private String stIntroArticle;
-    private String texteIntroArticle;
+    // Introduction dynamique
+    private Section introduction;
 
-    private String st1Article;
-    private String texte1Article;
+    // Liste dynamique de sections
+    private List<Section> sections;
 
-    private String st2Article;
-    private String texte2Article;
+    // Conclusion dynamique
+    private Section conclusion;
 
-    private String st3Article;
-    private String texte3Article;
+    // Références et lien scientifique
+    private List<String> references;
+    private String lienArticle;
 
-    private String stConclusionArticle;
-    private String texteConclusionArticle;
-
+    // Image Base64
     private String imageBase64;
+
+    // Dates
     private Date dateCreation;
     private Date dateModification;
+
+    // Classe interne pour sections / introduction / conclusion
+    @Data
+    public static class Section {
+        private String sousTitre;
+        private String texte;
+    }
 }
