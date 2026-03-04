@@ -11,5 +11,6 @@ public interface IntArticleService {
     public void deleteArticleById(String id);
     public Article addArticle(Article article);
     public List<Article> getThreeLastArticles();
+    public Article updateArticle(Article article);
 
 }

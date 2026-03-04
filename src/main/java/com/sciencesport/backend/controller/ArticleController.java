@@ -48,8 +48,6 @@ public class ArticleController {
         return ResponseEntity.ok(articleFinded);
     }
 
-
-
     @PostMapping
     public ResponseEntity<Article> save(@RequestBody Article article) {
         logger.info("Entrée dans le Controller pour ajouter un nouvel article : {}", article);
@@ -63,10 +61,15 @@ public class ArticleController {
         intArticleService.deleteArticleById(id);
     }
 
-/*
-    @PostMapping
-    public Article save(@RequestBody Article article) {
-
+    @PutMapping("/{id}")
+    public ResponseEntity<Article> update(
+            @PathVariable String id,
+            @RequestBody Article article) {
+        logger.info("Entrée dans le Controller pour modifier l'article : {}", id);
+        article.setId(id); // sécurité : on force l'id depuis l'URL
+        Article updatedArticle = intArticleService.updateArticle(article);
+        logger.info("Modification de l'article réussie");
+        return ResponseEntity.ok(updatedArticle);
     }
-*/
+
 }
