@@ -15,14 +15,45 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+
+/**
+ * Service pour gérer les opérations liées aux articles.
+ * <p>
+ * Cette classe implémente {@link IntArticleService} et fournit des méthodes pour :
+ * <ul>
+ *     <li>Récupérer tous les articles ou un article spécifique</li>
+ *     <li>Ajouter, mettre à jour ou supprimer un article</li>
+ *     <li>Obtenir les trois derniers articles selon leur date de modification</li>
+ * </ul>
+ * <p>
+ * Le service utilise {@link ArticleRepository} pour interagir avec la base de données MongoDB
+ * et {@link Logger} pour enregistrer les informations et le débogage.
+ * </p>
+ * <p>
+ * Les méthodes peuvent lever des exceptions de type {@link IllegalArgumentException} ou
+ * {@link ResponseStatusException} en cas d'erreurs de validation.
+ * </p>
+ */
 @Service
 public class ArticleService implements IntArticleService{
 
     private Logger logger =  LogManager.getLogger(ArticleService.class);
 
+    /**
+     * Repository pour gérer les opérations CRUD sur les articles.
+     * <p>
+     * Injecté automatiquement par Spring grâce à {@link org.springframework.beans.factory.annotation.Autowired}.
+     * Utilisé pour créer, mettre à jour, supprimer ou rechercher des instances de {@link com.sciencesport.backend.model.Article}.
+     * </p>
+     */
     @Autowired
     private ArticleRepository articleRepository;
 
+    /**
+     * Récupère tous les articles présents dans la base de données.
+     *
+     * @return une liste de {@link Article}, vide si aucun article n'est trouvé
+     */
     @Override
     public List<Article> getAllArticles() {
         logger.info("Entrée dans le service pour récupérer la liste des articles");
@@ -36,6 +67,13 @@ public class ArticleService implements IntArticleService{
         }
     }
 
+    /**
+     * Récupère un article par son identifiant.
+     *
+     * @param id l'identifiant de l'article
+     * @return l'article correspondant à l'identifiant
+     * @throws java.util.NoSuchElementException si aucun article n'est trouvé
+     */
     @Override
     public Article getArticleById(String id) {
         logger.info("Entrée dans le Service pour récupérer un article par son Id : {}", id);
@@ -44,6 +82,11 @@ public class ArticleService implements IntArticleService{
         return articleFinded;
     }
 
+    /**
+     * Supprime un article par son identifiant.
+     *
+     * @param id l'identifiant de l'article à supprimer
+     */
     @Override
     public void deleteArticleById(String id) {
         logger.info("Entrée dans le Service pour supprimer un article par son Id.");
@@ -51,6 +94,11 @@ public class ArticleService implements IntArticleService{
         logger.info("Suppression de l'article réussi");
     }
 
+    /**
+     * Récupère les trois derniers articles selon la date de modification.
+     *
+     * @return une liste contenant au maximum trois articles les plus récents
+     */
     @Override
     public List<Article> getThreeLastArticles() {
         logger.info("Entrée dans le service pour récupérer la liste des 3 derniers articles.");
@@ -65,6 +113,13 @@ public class ArticleService implements IntArticleService{
         return troisDerniersArticles;
     }
 
+    /**
+     * Ajoute un nouvel article à la base de données.
+     *
+     * @param article l'article à ajouter
+     * @return l'article ajouté avec ses dates de création et modification mises à jour
+     * @throws IllegalArgumentException si l'article est null
+     */
     @Override
     public Article addArticle(Article article) {
         logger.info("Entrée dans le Service pour ajouter un nouvel article.");
@@ -81,6 +136,13 @@ public class ArticleService implements IntArticleService{
         return savedArticle;
     }
 
+    /**
+     * Met à jour un article existant dans la base de données.
+     *
+     * @param article l'article à mettre à jour, avec un identifiant valide
+     * @return l'article mis à jour
+     * @throws ResponseStatusException si l'article ou son identifiant est invalide
+     */
     @Override
     public Article updateArticle(Article article) {
         logger.info("Modification de l'article avec l'id : {}", article.getId());

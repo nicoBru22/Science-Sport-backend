@@ -17,38 +17,69 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+/**
+ * Représente un utilisateur stocké en base de données MongoDB.
+ * Implémente {@link UserDetails} pour l'intégration avec Spring Security.
+ *
+ * @author [Ton nom ou Sciencesport]
+ * @version 1.0
+ */
 @Document(collection = "users")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class User implements UserDetails {
+
+    /**
+     * Identifiant unique de l'utilisateur, généré automatiquement par MongoDB.
+     */
     @Id
     private String id;
 
+    /**
+     * Nom d'utilisateur, utilisé pour l'authentification.
+     * Doit contenir au moins 8 caractères et ne comporter que des lettres et chiffres.
+     */
     @Size(min = 8)
     @Pattern(regexp = "^[a-zA-Z0-9]+$")
     private String username;
 
-    // On n'utilise que 'mdp' pour éviter les conflits avec Spring Security
-    // WRITE_ONLY = Jackson lit le mdp quand Angular l'envoie,
-    // mais il ne l'écrit jamais quand Java répond à Angular.
+    /**
+     * Mot de passe de l'utilisateur, toujours masqué dans les réponses JSON.
+     * Utilisé uniquement en entrée pour des raisons de sécurité.
+     */
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String mdp;
 
+    /**
+     * Rôles de l'utilisateur, utilisés pour gérer les autorisations.
+     */
     private Set<String> roles;
 
     // --- Implémentation de UserDetails ---
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String getPassword() {
         return this.mdp;
     }
 
-    // On crée un setter explicite pour que UserService puisse modifier le mdp
+    /**
+     * Définit le mot de passe de l'utilisateur.
+     * @param mdp le nouveau mot de passe
+     */
     public void setMdp(String mdp) {
         this.mdp = mdp;
     }
 
+    /**
+     * {@inheritDoc}
+     * Convertit les rôles en {@link GrantedAuthority} pour Spring Security.
+     * @return une collection d'autorisations
+     */
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         if (roles == null) return Collections.emptyList();
@@ -57,8 +88,39 @@ public class User implements UserDetails {
                 .collect(Collectors.toList());
     }
 
-    @Override public boolean isAccountNonExpired() { return true; }
-    @Override public boolean isAccountNonLocked() { return true; }
-    @Override public boolean isCredentialsNonExpired() { return true; }
-    @Override public boolean isEnabled() { return true; }
+    /**
+     * {@inheritDoc}
+     * @return toujours true, car les comptes n'expirent pas dans cette implémentation
+     */
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     * @return toujours true, car les comptes ne sont jamais verrouillés
+     */
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     * @return toujours true, car les identifiants n'expirent pas
+     */
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     * @return toujours true, car les comptes sont toujours activés
+     */
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
 }

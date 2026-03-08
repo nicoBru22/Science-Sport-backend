@@ -16,6 +16,17 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
+/**
+ * Contrôleur REST pour gérer l'authentification et les opérations sur les utilisateurs.
+ * <p>
+ * Fournit des endpoints pour :
+ * <ul>
+ *     <li>Inscription d'un nouvel utilisateur</li>
+ *     <li>Connexion d'un utilisateur</li>
+ *     <li>Récupération des informations de l'utilisateur connecté</li>
+ *     <li>Déconnexion</li>
+ * </ul>
+ */
 @RestController
 @RequestMapping("/api/auth")
 public class UserController {
@@ -28,6 +39,12 @@ public class UserController {
     @Autowired
     private AuthenticationManager authenticationManager;
 
+    /**
+     * Inscrit un nouvel utilisateur.
+     *
+     * @param user l'utilisateur à créer
+     * @return {@link ResponseEntity} contenant l'utilisateur créé (sans mot de passe) ou un message d'erreur
+     */
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody User user) {
         logger.info("Tentative d'inscription pour l'utilisateur : {}", user.getUsername());
@@ -36,14 +53,13 @@ public class UserController {
             if (userService.findByUsername(user.getUsername()).isPresent()) {
                 logger.warn("Échec inscription : l'utilisateur {} existe déjà", user.getUsername());
                 return ResponseEntity
-                        .status(HttpStatus.CONFLICT) // 409 est plus précis que 400 ici
+                        .status(HttpStatus.CONFLICT)
                         .body(Map.of("message", "Erreur : Ce nom d'utilisateur est déjà pris."));
             }
 
             User createdUser = userService.addUser(user);
             logger.info("Utilisateur créé avec succès : ID = {}", createdUser.getId());
 
-            // On renvoie l'utilisateur sans son mot de passe pour la sécurité
             createdUser.setMdp(null);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
 
@@ -55,6 +71,13 @@ public class UserController {
         }
     }
 
+    /**
+     * Authentifie un utilisateur avec ses identifiants.
+     *
+     * @param credentials Map contenant "username" et "password"
+     * @return {@link ResponseEntity} contenant le statut et le nom d'utilisateur si succès,
+     *         sinon un message d'erreur 401 si échec d'authentification
+     */
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> credentials) {
         String username = credentials.get("username");
@@ -76,14 +99,20 @@ public class UserController {
 
         } catch (AuthenticationException e) {
             logger.error("Échec de connexion pour {} : {}", username, e.getMessage(), e);
-            return ResponseEntity.status(401).body(Map.of(
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of(
                     "status", "error",
                     "message", "Identifiants incorrects"
             ));
         }
     }
 
-
+    /**
+     * Récupère les informations de l'utilisateur actuellement connecté.
+     *
+     * @param authentication l'objet {@link Authentication} fourni par Spring Security
+     * @return {@link ResponseEntity} contenant l'utilisateur (sans mot de passe),
+     *         401 si non authentifié, ou 404 si utilisateur non trouvé
+     */
     @GetMapping("/me")
     public ResponseEntity<?> getMe(Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
@@ -92,19 +121,22 @@ public class UserController {
 
         logger.info("Vérification d'authentification pour : {}", authentication.getName());
 
-        // On cherche les infos complètes en base si besoin
         return userService.findByUsername(authentication.getName())
                 .map(user -> {
-                    user.setMdp(null); // Sécurité : ne jamais renvoyer le hash
+                    user.setMdp(null);
                     return ResponseEntity.ok(user);
                 })
                 .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
+    /**
+     * Déconnecte l'utilisateur courant en nettoyant le contexte de sécurité.
+     *
+     * @return {@link ResponseEntity} avec message de succès
+     */
     @PostMapping("/logout")
     public ResponseEntity<?> logout() {
-        // Ici on peut invalider la session si elle existe
-        SecurityContextHolder.clearContext(); // Nettoie l'authentification
+        SecurityContextHolder.clearContext();
         return ResponseEntity.ok(Map.of("status", "success", "message", "Déconnexion réussie"));
     }
 }
