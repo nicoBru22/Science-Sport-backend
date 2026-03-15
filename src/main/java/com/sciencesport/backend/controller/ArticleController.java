@@ -127,7 +127,7 @@ public class ArticleController {
     }
 
     @GetMapping("/rechercherParMot")
-    public ResponseEntity<List<Article>> findAllByMot(String mot) {
+    public ResponseEntity<List<Article>> findAllByMot(@RequestParam  String mot) {
         logger.info("Entrée dans le Controller pour récupérer la liste des articles contenant le mot : {}", mot);
         List<Article> listArticleFiltered = intArticleService.getListArticleContainsWord(mot);
         logger.info("Récupération des articles réussie.");
@@ -135,7 +135,7 @@ public class ArticleController {
     }
 
     @GetMapping("/rechercherParCategorie")
-    public ResponseEntity<List<Article>> findAllByCategorie(String categorie) {
+    public ResponseEntity<List<Article>> findAllByCategorie(@RequestParam String categorie) {
         logger.info("Entrée dans le Controller pour récupérer la liste des articles contenant par catégorie : {}", categorie);
         List<Article> listArticleFiltered = intArticleService.getArticlesByCategorie(categorie);
         logger.info("Récupération des articles par catégorie réussie.");
