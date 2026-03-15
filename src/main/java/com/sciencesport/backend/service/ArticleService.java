@@ -191,17 +191,34 @@ public class ArticleService implements IntArticleService{
         }
         String lowerWord = word.toLowerCase();
         List<Article> articles = getAllArticles();
-        List<Article> listArticleFiltered = articles.stream()
+        List<Article> filtered = articles.stream()
                 .filter(a ->
+                        // Titre
                         (a.getTitre() != null && a.getTitre().toLowerCase().contains(lowerWord)) ||
-                                (a.getCategorie() != null && a.getCategorie().toLowerCase().contains(lowerWord))
+                        // Catégorie
+                        (a.getCategorie() != null && a.getCategorie().toLowerCase().contains(lowerWord)) ||
+                        // Introduction
+                        (a.getIntroduction() != null && a.getIntroduction().getTexte() != null &&
+                                a.getIntroduction().getTexte().toLowerCase().contains(lowerWord)) ||
+                        // Sections intermédiaires
+                        (a.getSections() != null && a.getSections().stream()
+                                .anyMatch(s -> s.getTexte() != null &&
+                                        s.getTexte().toLowerCase().contains(lowerWord))) ||
+                        // Conclusion
+                        (a.getConclusion() != null && a.getConclusion().getTexte() != null &&
+                                a.getConclusion().getTexte().toLowerCase().contains(lowerWord)) ||
+                        // Références
+                        (a.getReferences() != null && a.getReferences().stream()
+                                .anyMatch(ref -> ref != null && ref.toLowerCase().contains(lowerWord))) ||
+                        // Lien externe
+                        (a.getLienArticle() != null && a.getLienArticle().toLowerCase().contains(lowerWord))
                 )
                 .toList();
-        if (listArticleFiltered.isEmpty()) {
-            logger.info("La liste des articles est vide");
+        logger.info("La liste des articles filtrée avec le mot '{}', contient {} articles",
+                word, filtered.size());
+        if (filtered.isEmpty()) {
+            logger.info("Aucun article ne contient le mot '{}'", word);
         }
-        logger.info("La liste des articles filtrée avec le mot {}, contient {} articles",
-                word, listArticleFiltered.size());
-        return listArticleFiltered;
+        return filtered;
     }
 }
