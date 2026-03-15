@@ -60,4 +60,20 @@ public interface IntArticleService {
      * @return l'article mis à jour
      */
     Article updateArticle(Article article);
+
+    /**
+     * Filtre les articles à partir d'une catégorie.
+     *
+     * @param categorie la catégorie recherchée
+     * @return la liste des articles de cette catégorie
+     */
+    List<Article> getArticlesByCategorie(String categorie);
+
+    /**
+     * Filtre les articles à partir d'un mot.
+     *
+     * @param word le mot à rechercher dans les articles
+     * @return la liste des articles contenant le mot
+     */
+    List<Article> getListArticleContainsWord(String word);
 }

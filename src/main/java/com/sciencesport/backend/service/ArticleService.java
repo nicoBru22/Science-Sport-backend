@@ -9,10 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -167,5 +164,44 @@ public class ArticleService implements IntArticleService{
         existingArticle.setDateModification(new Date());
 
         return articleRepository.save(existingArticle);
+    }
+
+    @Override
+    public List<Article> getArticlesByCategorie(String categorie) {
+        logger.info("Entrée dans le Service pour filtrer par la catégorie : {}", categorie);
+        if (categorie == null || categorie.isBlank()) {
+            throw new IllegalArgumentException("La catégorie ne peut pas être vide");
+        }
+        List<Article> articles = getAllArticles();
+        List<Article> listArticleFiltered = articles.stream()
+                .filter(a -> Objects.equals(a.getCategorie(), categorie))
+                .toList();
+        if (listArticleFiltered.isEmpty()) {
+            logger.info("La liste des articles est vide");
+        }
+        logger.info("La liste des articles filtrée avec {}, contient {} articles",
+                categorie, listArticleFiltered.size());
+        return listArticleFiltered;
+    }
+
+    public List<Article> getListArticleContainsWord(String word) {
+        logger.info("Entrée dans le Service pour rechercher un article par un mot : {}", word);
+        if (word == null || word.isBlank()) {
+            throw new IllegalArgumentException("Le mot recherché ne peut pas être vide");
+        }
+        String lowerWord = word.toLowerCase();
+        List<Article> articles = getAllArticles();
+        List<Article> listArticleFiltered = articles.stream()
+                .filter(a ->
+                        (a.getTitre() != null && a.getTitre().toLowerCase().contains(lowerWord)) ||
+                                (a.getCategorie() != null && a.getCategorie().toLowerCase().contains(lowerWord))
+                )
+                .toList();
+        if (listArticleFiltered.isEmpty()) {
+            logger.info("La liste des articles est vide");
+        }
+        logger.info("La liste des articles filtrée avec le mot {}, contient {} articles",
+                word, listArticleFiltered.size());
+        return listArticleFiltered;
     }
 }
